@@ -1,0 +1,68 @@
+version: '3.7'
+
+services:
+  # 1. METADATA DATABASE (Postgres)
+  # Used by Feast and MLflow to store structural data
+  db:
+    image: postgres:13
+    container_name: sentinel_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. ARTIFACT STORAGE (MinIO - S3 Compatible)
+  # Stores the actual model files and dataset snapshots
+  s3:
+    image: minio/minio:latest
+    container_name: sentinel_minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  # 3. EXPERIMENT TRACKING (MLflow)
+  # Dashboard to view model performance
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.10.0
+    container_name: sentinel_mlflow
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      MLFLOW_BACKEND_STORE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      MLFLOW_ARTIFACT_URI: s3://${MLFLOW_BUCKET_NAME}/
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      MLFLOW_S3_ENDPOINT_URL: http://s3:9000
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 4. ONLINE FEATURE STORE (Redis)
+  # Low-latency storage for real-time prediction features
+  redis:
+    image: redis:alpine
+    container_name: sentinel_redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
+  minio_data:
