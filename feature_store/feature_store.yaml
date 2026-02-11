@@ -1,15 +1,14 @@
 project: sentinel_fraud_detection
+provider: local
 
 registry:
-  registry_store_type: sql
-  path: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}
+  registry_type: sql
+  path: postgresql://sentinel_user:sentinel_secure_pass@localhost:5432/feature_store_db
   cache_ttl_seconds: 60
-
-provider: local
 
 online_store:
   type: redis
   connection_string: "localhost:6379"
 
 offline_store:
-  type: file
+  type: file    
