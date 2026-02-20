@@ -1,5 +1,4 @@
 version: '3.7'
-
 services:
   # 1. METADATA DATABASE (Postgres)
   # Used by Feast and MLflow to store structural data
@@ -40,7 +39,8 @@ services:
   # 3. EXPERIMENT TRACKING (MLflow)
   # Dashboard to view model performance
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.10.0
+    build: .
+    # image: ghcr.io/mlflow/mlflow:v2.10.0
     container_name: sentinel_mlflow
     restart: always
     ports:
@@ -51,6 +51,11 @@ services:
       AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
       AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
       MLFLOW_S3_ENDPOINT_URL: http://s3:9000
+    command: >
+      mlflow server
+      --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      --default-artifact-root s3://${MLFLOW_BUCKET_NAME}/
+      --host 0.0.0.0
     depends_on:
       db:
         condition: service_healthy
