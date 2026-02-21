@@ -1,7 +1,5 @@
-version: '3.7'
 services:
   # 1. METADATA DATABASE (Postgres)
-  # Used by Feast and MLflow to store structural data
   db:
     image: postgres:13
     container_name: sentinel_db
@@ -14,14 +12,16 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - sentinel_network
 
   # 2. ARTIFACT STORAGE (MinIO - S3 Compatible)
-  # Stores the actual model files and dataset snapshots
   s3:
     image: minio/minio:latest
     container_name: sentinel_minio
@@ -35,9 +35,10 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
+    networks:
+      - sentinel_network
 
   # 3. EXPERIMENT TRACKING (MLflow)
-  # Dashboard to view model performance
   mlflow:
     build: .
     # image: ghcr.io/mlflow/mlflow:v2.10.0
@@ -59,15 +60,52 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - sentinel_network
 
   # 4. ONLINE FEATURE STORE (Redis)
-  # Low-latency storage for real-time prediction features
   redis:
     image: redis:alpine
     container_name: sentinel_redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --dir /data
+    networks:
+      - sentinel_network
+
+  serving_api:
+    build:
+      context: ../serving_api
+    container_name: sentinel_api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - mlflow
+      - redis
+    networks:
+      - sentinel_network
+    restart: on-failure
+
+  dashboard:
+    build:
+      context: ../dashboard
+    container_name: sentinel_dashboard
+    ports:
+      - "8501:8501"
+    depends_on:
+      - serving_api
+    networks:
+      - sentinel_network
 
 volumes:
   postgres_data:
   minio_data:
+  redis_data:
+
+networks:
+  sentinel_network:
+    driver: bridge
