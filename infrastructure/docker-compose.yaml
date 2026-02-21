@@ -1,5 +1,4 @@
 services:
-  # 1. METADATA DATABASE (Postgres)
   db:
     image: postgres:13
     container_name: sentinel_db
@@ -21,7 +20,6 @@ services:
     networks:
       - sentinel_network
 
-  # 2. ARTIFACT STORAGE (MinIO - S3 Compatible)
   s3:
     image: minio/minio:latest
     container_name: sentinel_minio
@@ -38,7 +36,6 @@ services:
     networks:
       - sentinel_network
 
-  # 3. EXPERIMENT TRACKING (MLflow)
   mlflow:
     build: .
     # image: ghcr.io/mlflow/mlflow:v2.10.0
@@ -63,7 +60,6 @@ services:
     networks:
       - sentinel_network
 
-  # 4. ONLINE FEATURE STORE (Redis)
   redis:
     image: redis:alpine
     container_name: sentinel_redis

@@ -31,4 +31,3 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build -t sentinel-api:latest ./serving_api
-
