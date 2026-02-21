@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+mlflow
+pandas
+feast[redis,postgres]
+python-dotenv
+boto3
+scikit-learn
+psycopg[binary]

@@ -3,7 +3,7 @@ provider: local
 
 registry:
   registry_type: sql
-  path: postgresql://sentinel_user:sentinel_secure_pass@localhost:5432/feature_store_db
+  path: postgresql+psycopg://sentinel_user:sentinel_secure_pass@localhost:5432/feast_registry
   cache_ttl_seconds: 60
 
 online_store:
@@ -11,4 +11,5 @@ online_store:
   connection_string: "localhost:6379"
 
 offline_store:
-  type: file    
+  type: file
+

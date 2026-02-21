@@ -10,7 +10,7 @@ transaction = Entity(
 
 transaction_source = FileSource(
     name="transaction_source",
-    path="../data/train_transaction.parquet",
+    path="../data/train_transaction_clean.parquet",
     timestamp_field="event_timestamp",
 )
 

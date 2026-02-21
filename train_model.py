@@ -7,17 +7,22 @@ from feast import FeatureStore
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import recall_score, precision_score
+from dotenv import load_dotenv
+
+dotenv_path = os.path.join("infrastructure", ".env")
+load_dotenv(dotenv_path)
+
+MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER", "")
+MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD", "")
 
 os.environ['MLFLOW_S3_ENDPOINT_URL'] = "http://localhost:9000"
-os.environ['AWS_ACCESS_KEY_ID'] = "minio_admin"
-os.environ['AWS_SECRET_ACCESS_KEY'] = "minio_secure_pass"
+os.environ['AWS_ACCESS_KEY_ID'] = MINIO_ROOT_USER
+os.environ['AWS_SECRET_ACCESS_KEY'] = MINIO_ROOT_PASSWORD
 os.environ['MLFLOW_S3_IGNORE_TLS'] = "true"
 
 store = FeatureStore(repo_path="feature_store")
 
-print("Fetching features from the Feast...")
-
-entity_df = pd.read_parquet("data/train_transaction.parquet", columns=["TransactionID", "event_timestamp", "isFraud"])
+entity_df = pd.read_parquet("data/train_transaction_clean.parquet", columns=["TransactionID", "event_timestamp", "isFraud"])
 
 training_df = store.get_historical_features(
     entity_df=entity_df,
@@ -28,8 +33,6 @@ training_df = store.get_historical_features(
         "transaction_stats:addr1",
     ],
 ).to_df()
-
-print(training_df.head())
 
 X = training_df.drop(columns=["isFraud", "TransactionID", "event_timestamp"])
 y = training_df["isFraud"].fillna(0)
@@ -47,9 +50,9 @@ with mlflow.start_run():
     model.fit(X_train, y_train)
 
     y_pred = model.predict(X_test)
-    acc = model.score(X_test, y_test)
-    recall = recall_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred)
+    acc = float(model.score(X_test, y_test))
+    recall = float(recall_score(y_test, y_pred))
+    precision = float(precision_score(y_test, y_pred))
 
     mlflow.log_metric("accuracy", acc)
     mlflow.log_metric("recall", recall)
@@ -63,5 +66,3 @@ with mlflow.start_run():
     # )
 
     mlflow.sklearn.log_model(model, artifact_path="random_forest_model")
-
-    print(f"Model trained with accuracy: {acc}, recall: {recall}, precision: {precision}")
