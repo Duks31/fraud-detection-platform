@@ -24,6 +24,13 @@ jobs:
           pip install pytest httpx
     
       - name: Run Unit Tests
+        env:
+          MINIO_ROOT_USER: "test_user"
+          MINIO_ROOT_PASSWORD: "test_password"
+          POSTGRES_USER: "test_user"
+          POSTGRES_PASSWORD: "test_password"
+          POSTGRES_DB: "test_db"
+          MLFLOW_BUCKET_NAME: "test_bucket"     
         run: |
             cd serving_api
             pytest            
