@@ -79,6 +79,9 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    volumes:
+      - ../feature_store:/app/feature_store
+      - ../serving_api/main.py:/app/main.py
     depends_on:
       - mlflow
       - redis

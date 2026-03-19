@@ -8,22 +8,28 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import recall_score, precision_score
 from dotenv import load_dotenv
+import cloudpickle
 
-dotenv_path = os.path.join("infrastructure", ".env")
-load_dotenv(dotenv_path)
+load_dotenv("/app/.env")
 
-MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER", "default_user")
-MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD", "default_password")
+MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER")
+MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD")
 
-os.environ["MLFLOW_S3_ENDPOINT_URL"] = "http://s3:9000"
+if not MINIO_ROOT_USER or not MINIO_ROOT_PASSWORD:
+    raise ValueError("MinIO credentials not found! Check .env file.")
+
+print(f"✅ Loaded MinIO credentials: {MINIO_ROOT_USER}")
+
 os.environ["AWS_ACCESS_KEY_ID"] = MINIO_ROOT_USER
 os.environ["AWS_SECRET_ACCESS_KEY"] = MINIO_ROOT_PASSWORD
+os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+os.environ["MLFLOW_S3_ENDPOINT_URL"] = "http://s3:9000"
 os.environ["MLFLOW_S3_IGNORE_TLS"] = "true"
 
-store = FeatureStore(repo_path="feature_store")
+store = FeatureStore(repo_path="/app/feature_store")
 
 entity_df = pd.read_parquet(
-    "data/train_transaction_clean.parquet",
+    "/app/data/train_transaction_clean.parquet",
     columns=["TransactionID", "event_timestamp", "isFraud"],
 )
 
@@ -63,11 +69,12 @@ with mlflow.start_run():
     mlflow.log_metric("recall", recall)
     mlflow.log_metric("precision", precision)
 
-    # loggin the model to MinIO
-    # mlflow.sklearn.log_model(
-    #     sk_model=model,
-    #     artifact_path="random_forest_model",
-    #     serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_PICKLE,
-    # )
+    mlflow.sklearn.log_model(
+        sk_model=model,
+        artifact_path="random_forest_model",
+        serialization_format="cloudpickle",
+    )
 
-    mlflow.sklearn.log_model(model, artifact_path="random_forest_model")
+    print(
+        f"Model logged to: runs:/{mlflow.active_run().info.run_id}/random_forest_model"
+    )

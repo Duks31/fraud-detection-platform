@@ -15,7 +15,7 @@ load_dotenv(dotenv_path)
 MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER")
 MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD")
 
-os.environ["MLFLOW_S3_ENDPOINT_URL"] = "http://sentinel_minio:9000"
+os.environ["MLFLOW_S3_ENDPOINT_URL"] = "http://s3:9000"
 os.environ["AWS_ACCESS_KEY_ID"] = MINIO_ROOT_USER
 os.environ["AWS_SECRET_ACCESS_KEY"] = MINIO_ROOT_PASSWORD
 os.environ["MLFLOW_S3_IGNORE_TLS"] = "true"
@@ -28,21 +28,75 @@ store = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Load model and feature store
     global model, store
-
+    
     try:
-        store = FeatureStore(repo_path="../feature_store")
-
-        RUN_ID = "c8ef81eddff247918e8b15373227757d"
-        model_uri = f"runs:/{RUN_ID}/random_forest_model"
-
+        store = FeatureStore(repo_path="/app/feature_store")
+        
+        experiment = mlflow.get_experiment_by_name("Fraud detection")
+        if experiment is None:
+            raise ValueError("Experiment 'Fraud detection' not found")
+        
+        runs = mlflow.search_runs(
+            experiment_ids=[experiment.experiment_id],
+            order_by=["start_time DESC"],
+            max_results=1,
+        )
+        
+        if runs.empty:
+            raise ValueError("No runs found in experiment")
+        
+        RUN_ID = runs.iloc[0]["run_id"]
+        print(f"✅ Latest run ID: {RUN_ID}")
+        
+        # Find the latest model in MinIO
+        import boto3
+        s3 = boto3.client(
+            's3',
+            endpoint_url='http://s3:9000',
+            aws_access_key_id=os.getenv('MINIO_ROOT_USER'),
+            aws_secret_access_key=os.getenv('MINIO_ROOT_PASSWORD'),
+        )
+        
+        # List models sorted by last modified
+        objects = s3.list_objects_v2(Bucket='mlflow', Prefix='2/models/')
+        if 'Contents' not in objects:
+            raise ValueError("No models found in MinIO")
+        
+        # Find the most recent model directory
+        model_dirs = {}
+        for obj in objects['Contents']:
+            # Extract model ID from path like: 2/models/m-xxx/artifacts/...
+            parts = obj['Key'].split('/')
+            if len(parts) >= 3 and parts[2].startswith('m-'):
+                model_id = parts[2]
+                if model_id not in model_dirs or obj['LastModified'] > model_dirs[model_id]:
+                    model_dirs[model_id] = obj['LastModified']
+        
+        if not model_dirs:
+            raise ValueError("No valid model directories found")
+        
+        # Get the most recent model
+        latest_model_id = max(model_dirs.items(), key=lambda x: x[1])[0]
+        print(f"✅ Latest model ID: {latest_model_id}")
+        
+        # Load model directly from S3 path
+        model_uri = f"s3://mlflow/2/models/{latest_model_id}/artifacts"
+        print(f"✅ Loading model from: {model_uri}")
+        
         model = mlflow.sklearn.load_model(model_uri)
-
+        print("✅ Model loaded successfully!")
+        
+        yield
     except Exception as e:
-        print("⚠️  API will start but predictions will fail until model is loaded")
-
-    yield
+        import traceback
+        print(f"❌ CRITICAL STARTUP ERROR: {e}")
+        print(traceback.format_exc())
+        model = None
+        store = None
+        yield
+    finally:
+        print("Shutting down application...")
 
 
 app = FastAPI(title="Sentinel Fraud Detection API", lifespan=lifespan)

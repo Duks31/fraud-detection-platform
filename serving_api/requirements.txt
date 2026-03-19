@@ -6,4 +6,4 @@ feast[redis,postgres]
 python-dotenv
 boto3
 scikit-learn
-psycopg[binary]
+psycopg2-binary
