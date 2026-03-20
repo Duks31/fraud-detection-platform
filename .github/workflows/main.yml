@@ -32,7 +32,7 @@ jobs:
           POSTGRES_DB: "test_db"
           MLFLOW_BUCKET_NAME: "test_bucket"     
         run: |
-            cd serving_api
+            cd tests
             pytest            
 
       - name: Build Docker Image
