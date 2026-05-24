@@ -33,7 +33,7 @@ jobs:
           MLFLOW_BUCKET_NAME: "test_bucket"
           PYTHONPATH: "./serving_api"     
         run: |
-            pytests tests/
+            pytest tests/
 
       - name: Build Docker Image
         run: |
