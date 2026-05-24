@@ -30,10 +30,10 @@ jobs:
           POSTGRES_USER: "test_user"
           POSTGRES_PASSWORD: "test_password"
           POSTGRES_DB: "test_db"
-          MLFLOW_BUCKET_NAME: "test_bucket"     
+          MLFLOW_BUCKET_NAME: "test_bucket"
+          PYTHONPATH: "./serving_api"     
         run: |
-            cd tests
-            pytest            
+            pytests tests/
 
       - name: Build Docker Image
         run: |
