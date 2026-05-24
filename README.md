@@ -1,4 +1,4 @@
-# 🛡️ Sentinel: Real-time Fraud Detection MLOps Platform
+# Sentinel: Real-time Fraud Detection MLOps Platform
 
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 [![Docker](https://img.shields.io/badge/docker-compose-blue.svg)](https://docs.docker.com/compose/)
@@ -8,7 +8,7 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Architecture](#architecture)
@@ -26,7 +26,7 @@
 
 ---
 
-## 🎯 Overview
+## Overview
 
 Sentinel is a complete MLOps platform that demonstrates production-level machine learning infrastructure for fraud detection. It showcases:
 
@@ -40,56 +40,23 @@ Sentinel is a complete MLOps platform that demonstrates production-level machine
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ### System Architecture
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    SENTINEL FRAUD DETECTION                      │
-└─────────────────────────────────────────────────────────────────┘
 
-┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-│   Raw Data   │─────▶│    Feast     │─────▶│    Redis     │
-│  (Parquet)   │      │ Offline Store│      │ Online Store │
-└──────────────┘      └──────────────┘      └───────┬──────┘
-                             │                       │
-                             │                       │
-                             ▼                       │
-                      ┌──────────────┐              │
-                      │   Airflow    │              │
-                      │   Pipeline   │              │
-                      └──────┬───────┘              │
-                             │                       │
-                             ▼                       │
-                      ┌──────────────┐              │
-                      │    MLflow    │              │
-                      │   Tracking   │              │
-                      └──────┬───────┘              │
-                             │                       │
-                             ▼                       │
-                      ┌──────────────┐              │
-                      │    MinIO     │              │
-                      │   (S3-like)  │              │
-                      └──────┬───────┘              │
-                             │                       │
-                             └───────┬───────────────┘
-                                     │
-                                     ▼
-                              ┌──────────────┐
-                              │   FastAPI    │
-                              │   Serving    │
-                              └──────────────┘
-                                     │
-                                     ▼
-                              ┌──────────────┐
-                              │  Streamlit   │
-                              │  Dashboard   │
-                              └──────────────┘
-```
+![Architecture](schematics/sentinel_architecture.drawio.png)
 
----
+#### Legend
 
-## 🛠️ Tech Stack
+| Color | Layer | Components |
+|-------|-------|------------|
+| Blue | Data Ingestion & Presentation | Raw Data (Parquet), Streamlit Dashboard |
+| Green | Feature Store & Serving | Feast, Redis, FastAPI |
+| Amber | Orchestration | Apache Airflow |
+| Pink/Rose | Model Management | MLflow, MinIO |
+| Gray | Persistence | PostgreSQL |
+
+## Tech Stack
 
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
@@ -106,9 +73,9 @@ Sentinel is a complete MLOps platform that demonstrates production-level machine
 
 ---
 
-## 📊 Project Status
+## Project Status
 
-### ✅ Working Features
+### Working Features
 
 - [x] **Infrastructure**: 9 Docker containers running in orchestrated network
 - [x] **Feature Store**: Feast with PostgreSQL registry and Redis online store
@@ -120,14 +87,14 @@ Sentinel is a complete MLOps platform that demonstrates production-level machine
 - [x] **API Serving**: FastAPI endpoint with health checks
 - [x] **Feature Serving**: Real-time feature retrieval from Redis (~50K features)
 
-### 🚧 In Progress
+### In Progress
 
 - [ ] **Model Performance**: Baseline RandomForest (97.7% accuracy, needs tuning)
 - [ ] **Monitoring**: Prometheus + Grafana integration
 - [ ] **Testing**: Unit and integration test coverage
 - [ ] **Documentation**: Comprehensive setup guide
 
-### 📌 Known Limitations
+### Known Limitations
 
 - Model recall is 35% (needs hyperparameter tuning and feature engineering)
 - No data drift detection yet
@@ -136,7 +103,7 @@ Sentinel is a complete MLOps platform that demonstrates production-level machine
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -216,7 +183,7 @@ chmod +x teardown.sh
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 ```
 fraud-detection-platform/
 ├── airflow_dags/              # Airflow DAG definitions
@@ -287,7 +254,7 @@ fraud-detection-platform/
 
 ---
 
-## ✨ Features
+## Features
 
 ### Automated ML Pipeline (Airflow)
 
@@ -306,7 +273,7 @@ The pipeline runs daily and consists of:
 **Current Performance:**
 - Accuracy: 97.74%
 - Precision: 65.07%
-- Recall: 35.19% ⚠️ (needs improvement)
+- Recall: 35.19% (needs improvement)
 
 ### Feature Store (Feast)
 
@@ -341,7 +308,7 @@ The pipeline runs daily and consists of:
 
 ---
 
-## 🌐 Service Endpoints
+## Service Endpoints
 
 | Service | URL | Credentials |
 |---------|-----|-------------|
@@ -356,7 +323,7 @@ The pipeline runs daily and consists of:
 
 ---
 
-## 🔧 Development
+## Development
 
 ### Local Setup (Without Docker)
 
@@ -432,7 +399,7 @@ docker compose logs -f
 
 ---
 
-## 🗺️ TODO
+## TODO (_maybe PR_)
 
 - [ ] Model Evaluation metrics 
 - [ ] Hyperparameter tuning
@@ -461,15 +428,15 @@ Run the automated health check:
 ```
 
 This checks:
-- ✅ All Docker containers running
-- ✅ Database connections
-- ✅ MinIO bucket exists
-- ✅ Feast registry accessible
-- ✅ Redis populated with features
+- All Docker containers running
+- Database connections
+- MinIO bucket exists
+- Feast registry accessible
+- Redis populated with features
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please:
 
@@ -488,13 +455,13 @@ Contributions are welcome! Please:
 
 ---
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Dataset**: [IEEE-CIS Fraud Detection](https://www.kaggle.com/c/ieee-fraud-detection) (Kaggle)
 - **Inspired by**: Production MLOps best practices from Netflix, Uber, and Airbnb
@@ -502,7 +469,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📬 Contact
+## Contact
 
 **Chidubem** - [@Duks31](https://github.com/Duks31)
 
