@@ -18,7 +18,7 @@ MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD")
 if not MINIO_ROOT_USER or not MINIO_ROOT_PASSWORD:
     raise ValueError("MinIO credentials not found! Check .env file.")
 
-print(f"✅ Loaded MinIO credentials: {MINIO_ROOT_USER}")
+print(f" Loaded MinIO credentials: {MINIO_ROOT_USER}")
 
 os.environ["AWS_ACCESS_KEY_ID"] = MINIO_ROOT_USER
 os.environ["AWS_SECRET_ACCESS_KEY"] = MINIO_ROOT_PASSWORD

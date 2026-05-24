@@ -102,7 +102,7 @@ def run_feast_materialize():
             # Real error
             raise subprocess.CalledProcessError(result.returncode, result.args)
 
-    print("✅ Materialization completed successfully")
+    print(" Materialization completed successfully")
 
 
 def run_mlflow_training():
@@ -128,7 +128,7 @@ def run_mlflow_training():
     if result.returncode != 0:
         raise subprocess.CalledProcessError(result.returncode, result.args)
 
-    print("✅ Training completed successfully")
+    print(" Training completed successfully")
 
 
 with DAG(
