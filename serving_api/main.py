@@ -60,7 +60,8 @@ async def lifespan(app: FastAPI):
         )
 
         # List models sorted by last modified
-        objects = s3.list_objects_v2(Bucket="mlflow", Prefix="2/models/")
+        exp_id = experiment.experiment_id
+        objects = s3.list_objects_v2(Bucket="mlflow", Prefix=f"{exp_id}/models/")
         if "Contents" not in objects:
             raise ValueError("No models found in MinIO")
 
@@ -85,7 +86,7 @@ async def lifespan(app: FastAPI):
         print(f" Latest model ID: {latest_model_id}")
 
         # Load model directly from S3 path
-        model_uri = f"s3://mlflow/2/models/{latest_model_id}/artifacts"
+        model_uri = f"s3://mlflow/{exp_id}/models/{latest_model_id}/artifacts"
         print(f" Loading model from: {model_uri}")
 
         model = mlflow.sklearn.load_model(model_uri)

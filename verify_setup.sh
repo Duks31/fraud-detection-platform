@@ -110,7 +110,7 @@ if docker exec sentinel_db pg_isready -U sentinel_user >/dev/null 2>&1; then
     print_success "PostgreSQL is accepting connections"
     
     # Check databases exist
-    for db in feast_registry airflow_db sentinel_db; do
+    for db in feast_registry airflow_db; do
         if docker exec sentinel_db psql -U sentinel_user -lqt | cut -d \| -f 1 | grep -qw "$db"; then
             print_success "Database '$db' exists"
         else

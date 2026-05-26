@@ -143,7 +143,7 @@ if [ ! -f .env ]; then
 # PostgreSQL Configuration
 POSTGRES_USER=sentinel_user
 POSTGRES_PASSWORD=sentinel_secure_pass
-POSTGRES_DB=sentinel_db
+POSTGRES_DB=feast_registry
 
 # MinIO Configuration
 MINIO_ROOT_USER=minio_admin

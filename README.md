@@ -40,6 +40,8 @@ Sentinel is a complete MLOps platform that demonstrates production-level machine
 
 ---
 
+![Airflow UI](schematics/airflow.png) ![Streamlit Dashboard](schematics/dashboard.png)
+
 ## Architecture
 
 ### System Architecture
@@ -72,6 +74,17 @@ Sentinel is a complete MLOps platform that demonstrates production-level machine
 | **ML Framework** | scikit-learn | Model training |
 
 ---
+
+### Database Architecture: The Shared PostgreSQL Container (`sentinel_db`)
+
+A common question when viewing the running containers is why the `sentinel_db` container is used, even if a logical database named "sentinel_db" isn't explicitly active. 
+
+To conserve resources, we use a single PostgreSQL container (`sentinel_db`) as the central metadata backbone for the entire MLOps pipeline. During startup, the `init-db.sql` script dynamically provisions isolated logical databases inside this container for our core tools:
+
+* **`airflow_db`**: Stores Apache Airflow's orchestration metadata (DAG definitions, task states, RBAC credentials).
+* **`feast_registry`**: Acts as the central SQL registry for the Feast Feature Store, keeping the offline (Parquet) and online (Redis) stores synchronized.
+* **MLflow Tracking**: Uses the primary Postgres database to track experiment runs, hyperparameters, and the model registry state.
+
 
 ## Project Status
 
