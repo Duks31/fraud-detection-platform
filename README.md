@@ -8,6 +8,9 @@
 
 ---
 
+![Airflow UI](schematics/airflow.png) ![Streamlit Dashboard](schematics/dashboard.png)
+
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -39,8 +42,6 @@ Sentinel is a complete MLOps platform that demonstrates production-level machine
 **Use Case**: Credit card transaction fraud detection with 50,000+ transactions
 
 ---
-
-![Airflow UI](schematics/airflow.png) ![Streamlit Dashboard](schematics/dashboard.png)
 
 ## Architecture
 
