@@ -41,6 +41,8 @@ Sentinel is a complete MLOps platform that demonstrates production-level machine
 
 **Use Case**: Credit card transaction fraud detection with 50,000+ transactions
 
+Read the full techical writeup on [medium](https://medium.com/@chidubemndukwe/beyond-the-notebook-architecting-a-real-time-mlops-platform-for-fraud-detection-38dbf523aec4)
+
 ---
 
 ## Architecture
