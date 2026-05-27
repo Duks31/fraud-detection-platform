@@ -204,7 +204,7 @@ fraud-detection-platform/
 │   └── sentinal_retraining_dag.py
 │
 ├── infrastructure/            # Docker & orchestration configs
-│   ├── docker-compose.yaml   # Service definitions (9 containers)
+│   ├── docker-compose.yaml   # Service definitions (8 containers)
 │   ├── airflow.Dockerfile    # Custom Airflow image with Feast
 │   ├── Dockerfile            # MLflow server image
 │   ├── init-db.sql           # PostgreSQL initialization script
