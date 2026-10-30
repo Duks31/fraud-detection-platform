@@ -4,7 +4,7 @@
 [![Docker](https://img.shields.io/badge/docker-compose-blue.svg)](https://docs.docker.com/compose/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> A production-grade end-to-end MLOps platform for real-time fraud detection with automated feature engineering, model training, and serving infrastructure.
+> An end-to-end MLOps platform for real-time fraud detection with automated feature engineering, model training, and serving infrastructure.
 
 ---
 
